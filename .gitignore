@@ -1,0 +1,45 @@
+# ------------------------------------------------------------
+# Linux Performance Detective
+# ------------------------------------------------------------
+
+# Runtime-generated data
+logs/*
+!logs/.gitkeep
+
+reports/*
+!reports/.gitkeep
+
+evidence/*
+!evidence/.gitkeep
+
+# Release build artifacts
+dist/*
+!dist/.gitkeep
+
+# Temporary / editor files
+*.swp
+*.swo
+*~
+*.tmp
+*.bak
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Python cache artifacts
+__pycache__/
+*.py[cod]
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# IDE-local files
+.idea/
+.vscode/
+
+# Coverage / test cache
+.coverage
+.pytest_cache/

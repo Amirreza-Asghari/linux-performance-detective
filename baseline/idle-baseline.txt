@@ -1,0 +1,125 @@
+=== DATE ===
+Thu Aug 27 06:50:32 PM +0330 2026
+
+=== UPTIME ===
+ 18:50:32 up 30 min,  1 user,  load average: 0.71, 0.23, 0.28
+
+=== MEMORY ===
+               total        used        free      shared  buff/cache   available
+Mem:           1.9Gi       696Mi       168Mi       6.0Mi       1.2Gi       1.2Gi
+Swap:          984Mi       268Ki       984Mi
+
+=== VMSTAT ===
+procs -----------memory---------- ---swap-- -----io---- -system-- -------cpu-------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st gu
+ 0  0    268 172636  57544 1232600    0    0   420   480  617    3  3  8 88  0  0  0
+ 0  0    268 172636  57552 1232620    0    0     0    16  156  152  1  1 98  0  0  0
+ 0  0    268 172636  57552 1232620    0    0     0     0  143  121  1  1 98  0  0  0
+ 0  0    268 172636  57552 1232620    0    0     0     0  118  112  1  1 99  0  0  0
+ 0  0    268 172636  57552 1232620    0    0     0     0  155  138  3  2 96  0  0  0
+
+=== CPU ===
+Linux 6.12.94+deb13-amd64 (lpd-test-host) 	08/27/2026 	_x86_64_	(2 CPU)
+
+06:50:36 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+06:50:37 PM  all    8.08    0.00    8.59    0.00    0.00    0.51    0.00    0.00    0.00   82.83
+06:50:37 PM    0   12.00    0.00    9.00    0.00    0.00    1.00    0.00    0.00    0.00   78.00
+06:50:37 PM    1    4.08    0.00    8.16    0.00    0.00    0.00    0.00    0.00    0.00   87.76
+
+06:50:37 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+06:50:38 PM  all    1.51    0.00    0.50    0.00    0.00    0.50    0.00    0.00    0.00   97.49
+06:50:38 PM    0    1.01    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00   98.99
+06:50:38 PM    1    2.00    0.00    1.00    0.00    0.00    1.00    0.00    0.00    0.00   96.00
+
+06:50:38 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+06:50:39 PM  all    1.02    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00   98.98
+06:50:39 PM    0    1.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00   99.00
+06:50:39 PM    1    1.03    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00   98.97
+
+Average:     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+Average:     all    3.54    0.00    3.03    0.00    0.00    0.34    0.00    0.00    0.00   93.10
+Average:       0    4.68    0.00    3.01    0.00    0.00    0.33    0.00    0.00    0.00   91.97
+Average:       1    2.37    0.00    3.05    0.00    0.00    0.34    0.00    0.00    0.00   94.24
+
+=== DISK ===
+Linux 6.12.94+deb13-amd64 (lpd-test-host) 	08/27/2026 	_x86_64_	(2 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           3.38    0.04    7.86    0.47    0.00   88.25
+
+Device            r/s     rkB/s   rrqm/s  %rrqm r_await rareq-sz     w/s     wkB/s   wrqm/s  %wrqm w_await wareq-sz     d/s     dkB/s   drqm/s  %drqm d_await dareq-sz     f/s f_await  aqu-sz  %util
+sda             17.52    419.08     5.48  23.84    1.25    23.92   14.17    478.75    14.14  49.93    1.69    33.78    0.00      0.00     0.00   0.00    0.00     0.00    0.00    0.00    0.05   2.47
+
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1.01    0.00    0.51    0.00    0.00   98.48
+
+Device            r/s     rkB/s   rrqm/s  %rrqm r_await rareq-sz     w/s     wkB/s   wrqm/s  %wrqm w_await wareq-sz     d/s     dkB/s   drqm/s  %drqm d_await dareq-sz     f/s f_await  aqu-sz  %util
+
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1.01    0.00    0.51    0.00    0.00   98.48
+
+Device            r/s     rkB/s   rrqm/s  %rrqm r_await rareq-sz     w/s     wkB/s   wrqm/s  %wrqm w_await wareq-sz     d/s     dkB/s   drqm/s  %drqm d_await dareq-sz     f/s f_await  aqu-sz  %util
+
+
+
+=== TOP CPU PROCESSES ===
+    PID    PPID COMMAND         %CPU %MEM STAT
+   3972    3906 ps              1100  0.2 R+
+   1290    1257 Xorg             3.7  4.9 Ssl+
+    682       1 vmtoolsd         1.7  0.5 Ssl
+   2471       1 xfce4-terminal   1.2  2.3 Sl
+   1487       1 vmtoolsd         0.7  0.6 S
+      1       0 systemd          0.6  0.7 Ss
+   2189       1 vmtoolsd         0.4  1.8 Sl
+   2123    2021 xfwm4            0.4  6.2 Sl
+   2162    2021 xfce4-panel      0.2  2.0 Sl
+   2176    2021 xfdesktop        0.2  2.6 Sl
+     26       2 migration/1      0.2  0.0 S
+   3834       2 kworker/0:2-mm_  0.2  0.0 I
+   3863       2 kworker/1:0-eve  0.1  0.0 I
+    320       1 systemd-journal  0.1  0.7 Ss
+
+=== TOP MEMORY PROCESSES ===
+    PID    PPID COMMAND         %CPU %MEM   RSS STAT
+   2123    2021 xfwm4            0.4  6.2 124448 Sl
+   1290    1257 Xorg             3.7  4.9 97196 Ssl+
+   2176    2021 xfdesktop        0.2  2.6 52456 Sl
+   2471       1 xfce4-terminal   1.2  2.3 47284 Sl
+   2162    2021 xfce4-panel      0.2  2.0 39944 Sl
+   2208    2021 applet.py        0.0  2.0 39756 S
+   2189       1 vmtoolsd         0.4  1.8 37020 Sl
+   2191    2021 nm-applet        0.0  1.7 34688 Sl
+   2187    2021 localsearch-3    0.0  1.6 33076 SNl
+   2284    2162 wrapper-2.0      0.0  1.3 27612 Sl
+   1861       1 exim4            0.0  1.2 24292 Ss
+   2140    2021 xfsettingsd      0.0  1.2 24284 Sl
+   2182    2162 wrapper-2.0      0.0  1.2 24124 Sl
+   2021    1967 xfce4-session    0.0  1.2 24032 Ssl
+
+=== NETWORK ===
+Total: 478
+TCP:   7 (estab 0, closed 0, orphaned 0, timewait 0)
+
+Transport Total     IP        IPv6
+RAW	  1         0         1        
+UDP	  5         3         2        
+TCP	  7         3         4        
+INET	  13        6         7        
+FRAG	  0         0         0        
+
+
+=== FILESYSTEM ===
+Filesystem     Type      Size  Used Avail Use% Mounted on
+udev           devtmpfs  932M     0  932M   0% /dev
+tmpfs          tmpfs     194M  1.2M  193M   1% /run
+/dev/sda1      ext4      6.9G  5.1G  1.5G  78% /
+tmpfs          tmpfs     968M     0  968M   0% /dev/shm
+tmpfs          tmpfs     5.0M  8.0K  5.0M   1% /run/lock
+tmpfs          tmpfs     1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+/dev/sda7      ext4      552M  1.9M  509M   1% /tmp
+/dev/sda5      ext4      2.0G  365M  1.5G  20% /var
+/dev/sda8      ext4      9.2G   65M  8.6G   1% /home
+tmpfs          tmpfs     1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+tmpfs          tmpfs     194M   88K  194M   1% /run/user/1000
