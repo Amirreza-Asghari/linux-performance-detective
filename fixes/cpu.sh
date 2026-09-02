@@ -11,12 +11,47 @@ cpu_remediate() {
     local cpu_usage="${LPD_CPU_USAGE:-N/A}"
     local expected_start="${LPD_CPU_PID_START:-N/A}"
 
+    local saturation_count="${LPD_CPU_SATURATION_COUNT:-1}"
+
 
     printf "Target PID:          %s\n" "$pid"
     printf "Command:             %s\n" "$command"
     printf "CPU usage:           %s%%\n" "$cpu_usage"
+    printf "Saturated processes: %s\n" "$saturation_count"
 
     echo
+
+
+    #
+    # ------------------------------------------------------------
+    # MULTI-PROCESS SAFETY POLICY
+    # ------------------------------------------------------------
+    #
+    # LPD intentionally does not translate a multi-process CPU
+    # incident into a blind single-PID termination.
+    #
+    # Multiple CPU-heavy processes may belong to independent
+    # workloads, services or process groups. A wider remediation
+    # requires operator understanding of that relationship first.
+    #
+
+    if [[ "$saturation_count" =~ ^[0-9]+$ ]] &&
+       (( saturation_count >= 2 )); then
+
+        warn "Multi-process CPU saturation was diagnosed."
+
+        warn "Single-PID automatic remediation has been blocked."
+
+        info "Review the related workload, service, process group or parent process before taking action."
+
+
+        # Consumed by the interactive workflow after this function returns.
+        # shellcheck disable=SC2034
+        LPD_CPU_ACTION="MULTI_PROCESS_BLOCKED"
+
+
+        return 10
+    fi
 
 
     #
@@ -35,6 +70,8 @@ cpu_remediate() {
 
         info "Automatic remediation has been blocked."
 
+        # Consumed by the interactive workflow after this function returns.
+        # shellcheck disable=SC2034
         LPD_CPU_ACTION="STALE_PID"
 
         return 10
@@ -45,6 +82,8 @@ cpu_remediate() {
 
         warn "LPD will not terminate itself or its parent shell."
 
+        # Consumed by the interactive workflow after this function returns.
+        # shellcheck disable=SC2034
         LPD_CPU_ACTION="PROTECTED"
 
         return 10
@@ -57,6 +96,8 @@ cpu_remediate() {
 
         info "Automatic termination will not be offered."
 
+        # Consumed by the interactive workflow after this function returns.
+        # shellcheck disable=SC2034
         LPD_CPU_ACTION="PROTECTED"
 
         return 10
@@ -103,6 +144,8 @@ cpu_remediate() {
             fi
 
 
+            # Consumed by the interactive workflow after this function returns.
+            # shellcheck disable=SC2034
             LPD_CPU_ACTION="INSPECT"
 
             return 10
@@ -135,6 +178,8 @@ cpu_remediate() {
 
                     info "Remediation cancelled"
 
+                    # Consumed by the interactive workflow after this function returns.
+                    # shellcheck disable=SC2034
                     LPD_CPU_ACTION="CANCELLED"
 
                     return 10
@@ -161,6 +206,8 @@ cpu_remediate() {
 
                 fail "SIGTERM blocked to avoid affecting the wrong process."
 
+                # Consumed by the interactive workflow after this function returns.
+                # shellcheck disable=SC2034
                 LPD_CPU_ACTION="SAFETY_ABORT"
 
                 return 3
@@ -182,6 +229,8 @@ cpu_remediate() {
 
                 ok "SIGTERM sent to process $pid"
 
+                # Consumed by verification after this function returns.
+                # shellcheck disable=SC2034
                 LPD_CPU_ACTION="SIGTERM"
 
                 return 0
@@ -199,6 +248,8 @@ cpu_remediate() {
 
             info "Remediation skipped"
 
+            # Consumed by the interactive workflow after this function returns.
+            # shellcheck disable=SC2034
             LPD_CPU_ACTION="SKIP"
 
             return 10
