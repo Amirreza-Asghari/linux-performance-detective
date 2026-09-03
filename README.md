@@ -10,10 +10,10 @@ workflow:
 Detect → Diagnose → Explain Evidence → Remediate → Verify → Report
 ```
 
-Current release candidate:
+Current release:
 
 ``` text
-0.2.0-rc1
+0.2.0
 ```
 
 ## Overview
@@ -99,7 +99,6 @@ automatic actions.
 -   Memory availability analysis
 -   Swap monitoring
 -   Memory pressure detection
--   Memory process analysis
 
 ## Disk I/O Diagnostics
 
@@ -112,7 +111,6 @@ automatic actions.
 
 -   TCP state analysis
 -   Connection activity analysis
--   Network anomaly detection
 -   Optional eBPF tracing support
 
 ## File Descriptor Diagnostics
@@ -159,8 +157,6 @@ Process command
 /proc/<pid>/stat starttime
 ```
 
-This protects against PID reuse problems.
-
 ## Protected Processes
 
 Important system processes are protected from unsafe remediation.
@@ -175,15 +171,10 @@ Targets are checked again before signaling operations.
 
 ``` bash
 ./lpd.sh version
-
 ./lpd.sh preflight
-
 ./lpd.sh scan
-
 ./lpd.sh diagnose cpu
-
 ./lpd.sh diagnose all
-
 ./lpd.sh interactive cpu
 ```
 
@@ -196,23 +187,15 @@ LPD generates:
 -   Markdown reports
 -   JSON reports
 
-Reports preserve diagnostic evidence and workflow results.
-
 ------------------------------------------------------------------------
 
 # Testing
 
-LPD includes regression and safety tests:
-
 ``` bash
 ./tests/run-safe-tests.sh
-
 ./tests/run-ui-tests.sh
-
 ./tests/run-incident-tests.sh
-
 ./tests/run-fault-injection-tests.sh
-
 ./tests/run-final-regression.sh
 ```
 
@@ -260,6 +243,6 @@ Keep machine-readable output clean.
 
 # Status
 
-Linux Performance Detective v0.2.0-rc1
+Linux Performance Detective v0.2.0
 
-Release candidate under final documentation and portfolio preparation.
+Public release prepared for portfolio demonstration.
