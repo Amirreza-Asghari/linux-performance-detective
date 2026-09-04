@@ -22,15 +22,6 @@ cpu_diagnose() {
     # CANDIDATE LIST
     # ------------------------------------------------------------
     #
-    # Inspect several CPU-heavy processes instead of trusting only
-    # the first PID returned by ps.
-    #
-    # This allows LPD to distinguish between single-process and
-    # multi-process CPU saturation.
-    #
-    # Every process candidate must also pass PID identity
-    # validation before its observations are trusted.
-    #
 
     local candidates=""
 
@@ -62,9 +53,10 @@ cpu_diagnose() {
     fi
 
 
+
     #
     # ------------------------------------------------------------
-    # STABLE CANDIDATE ANALYSIS
+    # CANDIDATE ANALYSIS
     # ------------------------------------------------------------
     #
 
@@ -75,6 +67,7 @@ cpu_diagnose() {
     local nice_value="0"
     local start_time="N/A"
 
+
     local candidate_pid=""
     local candidate_command=""
     local candidate_cpu="0"
@@ -82,12 +75,24 @@ cpu_diagnose() {
     local candidate_nice="0"
     local candidate_start=""
 
+
     local unstable_candidates=0
     local saturation_count=0
+
 
     local -a saturated_pids=()
     local -a saturated_commands=()
     local -a saturated_cpu_values=()
+
+
+    #
+    # Keep stable candidates for aggregated CPU analysis
+    #
+
+    local -a cpu_candidate_pids=()
+    local -a cpu_candidate_commands=()
+    local -a cpu_candidate_values=()
+
 
 
     while read -r \
@@ -96,30 +101,25 @@ cpu_diagnose() {
         candidate_cpu \
         candidate_state \
         candidate_nice
+
     do
 
         [[ "$candidate_pid" =~ ^[0-9]+$ ]] || continue
 
 
+
         #
-        # LPD must never diagnose itself or its direct parent
-        # as the CPU culprit.
+        # Ignore LPD itself
         #
 
         if (( candidate_pid == $$ ||
               candidate_pid == PPID )); then
 
             continue
+
         fi
 
 
-        #
-        # Capture PID identity safely.
-        #
-        # lpd_capture_pid_identity validates the observed PID and
-        # command and returns the /proc starttime used later to
-        # protect remediation against PID reuse.
-        #
 
         candidate_start=$(
             lpd_capture_pid_identity \
@@ -130,13 +130,16 @@ cpu_diagnose() {
             unstable_candidates=$((unstable_candidates + 1))
 
             continue
+
         }
 
 
-        #
-        # Keep the highest stable CPU consumer as the primary
-        # evidence/remediation target.
-        #
+
+        cpu_candidate_pids+=("$candidate_pid")
+        cpu_candidate_commands+=("$candidate_command")
+        cpu_candidate_values+=("$candidate_cpu")
+
+
 
         if [[ "$pid" == "N/A" ]]; then
 
@@ -150,10 +153,6 @@ cpu_diagnose() {
         fi
 
 
-        #
-        # Count every stable process independently reaching the
-        # configured per-process saturation threshold.
-        #
 
         if awk \
             -v cpu="$candidate_cpu" \
@@ -164,6 +163,7 @@ cpu_diagnose() {
 
                 exit 1
             }'
+
         then
 
             saturated_pids+=("$candidate_pid")
@@ -174,11 +174,116 @@ cpu_diagnose() {
 
         fi
 
+
     done <<< "$candidates"
+    #
+    # ------------------------------------------------------------
+    # AGGREGATED MULTI PROCESS SATURATION
+    # ------------------------------------------------------------
+    #
+
+    if (( saturation_count == 0 )); then
+
+        local combined_cpu=0
+        local cpu_cores=1
+        local multi_process_threshold=20
+
+
+        combined_cpu=$(
+            printf "%s\n" "${cpu_candidate_values[@]}" |
+            awk \
+            -v threshold="$multi_process_threshold" '
+                ($1 + 0) >= threshold {
+                    sum += $1
+                }
+
+                END {
+                    printf "%.1f", sum
+                }
+            '
+        )
+
+
+        cpu_cores=$(nproc 2>/dev/null)
+
+
+        if [[ ! "$cpu_cores" =~ ^[0-9]+$ ]] ||
+           (( cpu_cores <= 0 )); then
+
+            cpu_cores=1
+
+        fi
+
+
+
+        if awk \
+            -v total="$combined_cpu" \
+            -v cores="$cpu_cores" \
+            'BEGIN {
+
+                if (total >= (cores * 70))
+                    exit 0
+
+                exit 1
+
+            }'
+
+        then
+
+
+            local index=0
+
+
+            for (( index=0; index<${#cpu_candidate_pids[@]}; index++ )); do
+
+
+                if awk \
+                    -v cpu="${cpu_candidate_values[$index]}" \
+                    -v threshold="$multi_process_threshold" \
+                    'BEGIN {
+
+                        if ((cpu + 0) >= (threshold + 0))
+                            exit 0
+
+                        exit 1
+
+                    }'
+
+                then
+
+                    saturated_pids+=(
+                        "${cpu_candidate_pids[$index]}"
+                    )
+
+
+                    saturated_commands+=(
+                        "${cpu_candidate_commands[$index]}"
+                    )
+
+
+                    saturated_cpu_values+=(
+                        "${cpu_candidate_values[$index]}"
+                    )
+
+                fi
+
+
+            done
+
+
+            saturation_count=${#saturated_pids[@]}
+
+
+        fi
+
+    fi
+
 
 
     #
-    # Every candidate disappeared or became inaccessible.
+    # ------------------------------------------------------------
+    # EVERY PROCESS DISAPPEARED
+    # ------------------------------------------------------------
     #
 
     if [[ "$pid" == "N/A" ]]; then
@@ -198,12 +303,14 @@ cpu_diagnose() {
 
 
         return 3
+
     fi
+
 
 
     #
     # ------------------------------------------------------------
-    # OPTIONAL CMDLINE
+    # CMDLINE
     # ------------------------------------------------------------
     #
 
@@ -221,13 +328,11 @@ cpu_diagnose() {
     fi
 
 
+
     #
     # ------------------------------------------------------------
-    # SAVE WORKFLOW EVIDENCE
+    # SAVE EVIDENCE
     # ------------------------------------------------------------
-    #
-    # These variables are intentionally consumed by other LPD
-    # workflow modules after cpu_diagnose returns.
     #
 
     # shellcheck disable=SC2034
@@ -246,6 +351,7 @@ cpu_diagnose() {
     LPD_CPU_SATURATION_COUNT="$saturation_count"
 
 
+
     #
     # ------------------------------------------------------------
     # OUTPUT
@@ -260,11 +366,9 @@ cpu_diagnose() {
     printf "State:               %s\n" "$state"
     printf "Nice value:          %s\n" "$nice_value"
     printf "Command line:        %s\n" "$cmdline"
-
-
     #
     # ------------------------------------------------------------
-    # MULTI-PROCESS SATURATION
+    # MULTI PROCESS SATURATION
     # ------------------------------------------------------------
     #
 
@@ -274,10 +378,12 @@ cpu_diagnose() {
         echo "CPU-intensive processes:"
         echo
 
+
         printf "%-10s %-24s %-10s\n" \
             "PID" \
             "COMMAND" \
             "CPU"
+
 
         printf "%-10s %-24s %-10s\n" \
             "----------" \
@@ -285,9 +391,11 @@ cpu_diagnose() {
             "----------"
 
 
+
         local index=0
 
-        for (( index = 0; index < saturation_count; index++ )); do
+
+        for (( index=0; index<saturation_count; index++ )); do
 
             printf "%-10s %-24s %s%%\n" \
                 "${saturated_pids[$index]}" \
@@ -297,22 +405,26 @@ cpu_diagnose() {
         done
 
 
+
         echo
         echo "Diagnosis:           Multi-process CPU saturation"
         printf "Saturated processes: %s\n" "$saturation_count"
         echo "Culprit confidence:  HIGH"
 
+
         warn \
-            "Multiple processes are each consuming approximately one full CPU core"
+            "Multiple processes are consuming significant CPU capacity"
 
 
         return 1
+
     fi
+
 
 
     #
     # ------------------------------------------------------------
-    # SINGLE-PROCESS SATURATION
+    # SINGLE PROCESS SATURATION
     # ------------------------------------------------------------
     #
 
@@ -323,12 +435,15 @@ cpu_diagnose() {
         echo "Saturated processes: 1"
         echo "Culprit confidence:  HIGH"
 
+
         warn \
             "One process is consuming approximately one full CPU core"
 
 
         return 1
+
     fi
+
 
 
     #
@@ -342,8 +457,11 @@ cpu_diagnose() {
     echo "Saturated processes: 0"
     echo "Culprit confidence:  LOW"
 
-    info "No actionable per-process CPU saturation detected"
+
+    info \
+        "No actionable per-process CPU saturation detected"
 
 
     return 0
+
 }
